@@ -2,7 +2,6 @@ from typing import List, Union, Callable
 import customtkinter
 
 
-
 class MyComboBoxButton:
     def __init__(self, root, height, width, x, y, values: List, command):
         self.combobox_button = customtkinter.CTkComboBox(
@@ -11,7 +10,7 @@ class MyComboBoxButton:
         )
         self.combobox_button.place(x=x, y=y)
 
-    def get_value(self, event=None):
+    def get_value(self):
         select_value = self.combobox_button.get()
         return select_value
 
@@ -22,13 +21,38 @@ class MyEntryField:
                                                   justify='CENTER', placeholder_text="CTkEntry")
         self.entry_field.place(x=x, y=y)
 
-class MyLabel_1(customtkinter.CTkLabel):
-    def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)
+
+class NoteLabel:
+    def __init__(self, master, text, row, column):
+
+        self.label = customtkinter.CTkLabel(
+            master,
+            text=text,
+            width = 70,
+            height = 30,
+        )
+        self.label.grid(row=row, column=column, padx=5, pady=5)
+    def update_text(self, new_text):
+        self.label.configure(text=new_text)
+
+
+class NoteButton:
+    def __init__(self, master, command, row, column, text: str= '', image = None):
+        self.button = customtkinter.CTkButton(
+            master,
+            text=text,
+            image=image,
+            command=command,
+            width=70,
+            height=30,
+        )
+        self.button.grid(row=row, column=column, padx=5, pady=5)
+
 
 
 class MyLabel:
     def __init__(self, root, text, height, width, row, column, padx, pady):
+
         self.label = customtkinter.CTkLabel(
             root, text=text, height=height, width=width, fg_color='white',
             text_color='black', corner_radius=20
@@ -39,10 +63,9 @@ class MyLabel:
         self.label.configure(text=new_text)
 
 
-
 class MyCheckBox:
     def __init__(self, root, row, column, padx, pady, variable):
-        self.checkbox = customtkinter.CTkCheckBox(root, command=None, text='',variable=variable,
+        self.checkbox = customtkinter.CTkCheckBox(root, command=None, text='', variable=variable,
                                                   onvalue=1, offvalue=0)
         self.checkbox.grid(row=row, column=column, padx=padx, pady=pady)
 
@@ -51,7 +74,6 @@ class MyCheckBox:
             return self.checkbox.get()
         except ValueError:
             return None
-
 
 
 class MyProgressBar:
@@ -68,12 +90,12 @@ class MyProgressBar:
         self.progressbar.update()
 
 
-
 class FloatSpinbox(customtkinter.CTkFrame):
     def __init__(self, *args,
                  width: int = 100,
                  height: int = 32,
                  step_size: Union[int, float] = 1,
+                 contrast_value,
                  command: Callable = None,
                  **kwargs):
         super().__init__(*args, width=width, height=height, **kwargs)
@@ -98,7 +120,7 @@ class FloatSpinbox(customtkinter.CTkFrame):
         self.add_button.grid(row=0, column=2, padx=(0, 3), pady=3)
 
         # default value
-        self.entry.insert(0, "1.0")
+        self.entry.insert(0, str(contrast_value))
 
     def add_button_callback(self):
         if self.command is not None:

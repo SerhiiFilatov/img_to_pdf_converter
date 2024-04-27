@@ -2,12 +2,14 @@ import customtkinter
 
 from note import SelectionOfOptions
 
+customtkinter.set_appearance_mode('dark')
+
 
 class MainWindow(customtkinter.CTk):
     def __init__(self):
         super().__init__()
         self.title("Image converter")
-        self.geometry("350x260+800+300")
+        self.geometry("350x235+800+300")
         self.resizable(False, False)
         self.create_objects()
 

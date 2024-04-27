@@ -1,127 +1,154 @@
 import customtkinter
-import re
-
-import data
-from side_window_additional_settings import WindowForSettings, WindowForSplitSettings
-from widgets import MyLabel_1
+from data import upload_image, transform_image, additional_settings_image_2, transform_image_to_pdf, \
+    additional_settings_image, merge_icon, split_icon
+from side_window_additional_settings import WindowForConvertSettings, WindowForSplitSettings
 from engine import Engine
+from widgets import NoteLabel, NoteButton
 
 
 class SelectionOfOptions(customtkinter.CTkTabview):
     """
-    class CTkTabview consisting of two sections for working with PDF
+    A class representing a tab view for working with PDF, text extraction, and image conversion.
     """
-    def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)
-        self.add("Convert to PDF")
-        self.add("Split or merge PDF file")
-        self.add("Text extraction")
-        self.engine = Engine()
-        self.create_transformation_widgets()
-        self.create_split_merge_widgets()
 
-    def create_window(self):
+    def __init__(self, master, **kwargs):
         """
-        create a settings window
-        :return:
+        Initializes the SelectionOfOptions object.
+
+        Args:
+            master: The parent widget.
+            **kwargs: Additional keyword arguments.
         """
-        window_for_settings = WindowForSettings(self.engine)
+        super().__init__(master, **kwargs)
+        self.add("Pdf converter")
+        self.add("Text extraction")
+        self.add("Image converter")
+        self.engine = Engine()
+        self.image_converter_widgets()
+        self.pdf_converter_widgets()
+
+    def create_window_image_set(self):
+        """
+        Create a settings window for image conversion.
+        """
+        window_for_settings = WindowForConvertSettings(self.engine)
         window_for_settings.mainloop()
 
     def create_window_split_set(self):
         """
-        create a settings window
-        :return:
+        Create a settings window for PDF splitting.
         """
         window_for_settings = WindowForSplitSettings(self.engine)
         window_for_settings.mainloop()
 
-    def create_transformation_widgets(self):
+    def open_and_count(self):
         """
-        widget window for downloading and converting to PDF
-        :return:
+        Open files and count the number of images.
         """
-        upload_label = MyLabel_1(self.tab("Convert to PDF"), text='Download\nimages', height=30, width=70)
-        upload_label.grid(row=1, column=1, padx=5, pady=5)
+        self.engine.open_file(self.number_of_images)
 
-        upload_button = customtkinter.CTkButton(
-            master=self.tab("Convert to PDF"), text='', image=data.upload_image, height=30, width=70,
-            command=self.engine.open_file
-        )
-        upload_button.grid(row=1, column=2, padx=5, pady=5)
-
-        convert_label = MyLabel_1(self.tab("Convert to PDF"), text='Convert\nto PDF', height=30, width=70)
-        convert_label.grid(row=2, column=1, padx=5, pady=5)
-
-        convert_button = customtkinter.CTkButton(
-            master=self.tab("Convert to PDF"), text='', image=data.transform_image_to_pdf, height=30, width=70,
-            command=self.engine.convert_and_save
-        )
-        convert_button.grid(row=2, column=2, padx=5, pady=5)
-
-        convert_additional_settings_button = customtkinter.CTkButton(
-            master=self.tab("Convert to PDF"), text='', image=data.additional_settings_image, height=30, width=40,
-            command=self.create_window
-        )
-        convert_additional_settings_button.grid(row=2, column=3, padx=5, pady=5)
-
-        transform_label_image = MyLabel_1(self.tab("Convert to PDF"), text='Transform\nImage', height=30, width=70)
-        transform_label_image.grid(row=3, column=1, padx=5, pady=5)
-
-        transform_button_image = customtkinter.CTkButton(
-            master=self.tab("Convert to PDF"), text='', image=data.transform_image, height=30, width=70,
-            command=self.engine.convert_and_save
-        )
-        transform_button_image.grid(row=3, column=2, padx=5, pady=5)
-
-        image_additional_settings_button = customtkinter.CTkButton(
-            master=self.tab("Convert to PDF"), text='', image=data.additional_settings_image_2, height=30, width=40,
-            command=self.create_window
-        )
-        image_additional_settings_button.grid(row=3, column=3, padx=5, pady=5)
-
-    def create_split_merge_widgets(self):
+    def convert_and_count(self):
         """
-        widget window for downloading, merging, splitting PDF
-        :return:
+        Convert images to PDF and update progress label.
         """
+        self.engine.convert_and_save(self.progress_label)
 
-        def call_split_func():
-            self.engine.split_and_merge_pdf(start=self.engine.first_page_to_divide,
-                                            stop=self.engine.last_page_to_divide)
+    def split_and_merge_pdf(self):
+        """
+        Split and merge PDF files.
+        """
+        self.engine.split_and_merge_pdf(start=self.engine.first_page_to_divide, stop=self.engine.last_page_to_divide)
 
-        upload_label = customtkinter.CTkLabel(self.tab("Split or merge PDF file"),
-                                              text='Download', height=30, width=70)
-        upload_label.grid(row=1, column=1, padx=5, pady=5)
+    def image_converter_widgets(self):
+        """
+        Create widgets for image conversion.
+        """
+        self.upload_label_image = NoteLabel(master=self.tab("Image converter"),
+                                            text='Download\nimages',
+                                            row=2, column=1)
 
-        upload_button = customtkinter.CTkButton(
-            master=self.tab("Split or merge PDF file"), text='', image=data.upload_image, height=30, width=70,
-            command=self.engine.open_file
-        )
-        upload_button.grid(row=1, column=2, padx=5, pady=5)
+        self.upload_button_image = NoteButton(master=self.tab("Image converter"),
+                                              image=upload_image,
+                                              command=self.open_and_count,
+                                              row=2, column=2)
 
-        merge_label = customtkinter.CTkLabel(self.tab("Split or merge PDF file"),
-                                              text='Merge PDF', height=30, width=70)
-        merge_label.grid(row=2, column=1, padx=5, pady=5)
+        self.number_of_images = NoteLabel(master=self.tab("Image converter"),
+                                          text=f'0',
+                                          row=2, column=4)
 
-        button_merge_pdf = customtkinter.CTkButton(
-            master=self.tab("Split or merge PDF file"), text='', image=data.merge_icon, height=30, width=70,
-            command=self.engine.merge_pdf
-        )
-        button_merge_pdf.grid(row=2, column=2, padx=5, pady=5)
+        self.transform_label_image = NoteLabel(master=self.tab("Image converter"),
+                                               text='Transform\nImage',
+                                               row=4, column=1)
 
-        split_label = customtkinter.CTkLabel(self.tab("Split or merge PDF file"),
-                                              text='Split PDF', height=30, width=70)
-        split_label.grid(row=3, column=1, padx=5, pady=5)
+        self.transform_button_image = NoteButton(master=self.tab("Image converter"),
+                                                 image=transform_image,
+                                                 command=None,
+                                                 row=4, column=2)
 
-        button_split_pdf = customtkinter.CTkButton(
-            master=self.tab("Split or merge PDF file"), text='', image=data.split_icon, height=30, width=70,
-            command=call_split_func
-        )
-        button_split_pdf.grid(row=3, column=2, padx=5, pady=5)
+        self.image_additional_settings_button = NoteButton(master=self.tab("Image converter"),
+                                                           image=additional_settings_image_2,
+                                                           command=self.create_window_image_set,
+                                                           row=4, column=3)
 
-        split_settings_button = customtkinter.CTkButton(
-            master=self.tab("Split or merge PDF file"), text='', image=data.additional_settings_image, height=30, width=40,
-            command=self.create_window_split_set
-        )
-        split_settings_button.grid(row=3, column=3, padx=5, pady=5)
+        self.INFO_button = NoteButton(master=self.tab("Image converter"),
+                                      text='INFO',
+                                      command=self.engine.check_parameters,
+                                      row=5, column=1)
+
+    def pdf_converter_widgets(self):
+        """
+        Create widgets for PDF splitting and merging.
+        """
+        self.upload_label_pdf = NoteLabel(self.tab("Pdf converter"),
+                                          text='Download',
+                                          row=1, column=1)
+
+        self.upload_button_pdf = NoteButton(master=self.tab("Pdf converter"),
+                                            image=upload_image,
+                                            command=self.open_and_count,
+                                            row=1, column=2)
+
+        self.number_of_images = NoteLabel(self.tab("Pdf converter"),
+                                          text=f'0',
+                                          row=1, column=4)
+
+        self.convert_label_pdf = NoteLabel(self.tab("Pdf converter"),
+                                           text=f'Convert\nto PDF',
+                                           row=2, column=1)
+
+        self.convert_button_pdf = NoteButton(master=self.tab("Pdf converter"),
+                                             image=transform_image_to_pdf,
+                                             command=self.convert_and_count,
+                                             row=2, column=2)
+
+        self.convert_additional_settings_button_pdf = NoteButton(master=self.tab("Pdf converter"),
+                                                                 image=additional_settings_image,
+                                                                 command=self.create_window_image_set,
+                                                                 row=2, column=3)
+
+        self.progress_label = NoteLabel(self.tab("Pdf converter"),
+                                        text=f'Done 0 out of {str(len(self.engine.uploaded_files))}',
+                                        row=2, column=4)
+
+        self.merge_label = NoteLabel(self.tab("Pdf converter"),
+                                     text='Merge PDF',
+                                     row=3, column=1)
+
+        self.button_merge_pdf = NoteButton(master=self.tab("Pdf converter"),
+                                           image=merge_icon,
+                                           command=self.engine.merge_pdf,
+                                           row=3, column=2)
+
+        self.split_label = NoteLabel(self.tab("Pdf converter"),
+                                     text='Split PDF',
+                                     row=4, column=1)
+
+        self.button_split_pdf = NoteButton(master=self.tab("Pdf converter"),
+                                           image=split_icon,
+                                           command=self.split_and_merge_pdf,
+                                           row=4, column=2)
+
+        self.split_settings_button = NoteButton(master=self.tab("Pdf converter"),
+                                                image=additional_settings_image,
+                                                command=self.create_window_split_set,
+                                                row=4, column=3)
