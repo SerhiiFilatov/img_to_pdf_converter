@@ -1,8 +1,8 @@
 import customtkinter
-from data import upload_image, transform_image, additional_settings_image_2, transform_image_to_pdf, \
-    additional_settings_image, merge_icon, split_icon
-from side_window_additional_settings import WindowForConvertSettings, WindowForSplitSettings
+
+import data
 from engine import Engine
+from side_windows import WindowForConvertSettings, WindowForSplitSettings
 from widgets import NoteLabel, NoteButton
 
 
@@ -21,113 +21,87 @@ class SelectionOfOptions(customtkinter.CTkTabview):
         """
         super().__init__(master, **kwargs)
         self.add("Pdf converter")
-        self.add("Text extraction")
-        self.add("Image converter")
+        self.add("Text recognising")
         self.engine = Engine()
-        self.image_converter_widgets()
         self.pdf_converter_widgets()
+        self.text_extraction_widgets()
+
 
     def create_window_image_set(self):
         """
         Create a settings window for image conversion.
         """
-        window_for_settings = WindowForConvertSettings(self.engine)
-        window_for_settings.mainloop()
+        WindowForConvertSettings(self.engine)
 
     def create_window_split_set(self):
         """
         Create a settings window for PDF splitting.
         """
-        window_for_settings = WindowForSplitSettings(self.engine)
-        window_for_settings.mainloop()
+        WindowForSplitSettings(self.engine)
 
-    def open_and_count(self):
+    def open_and_count_pdf(self):
         """
         Open files and count the number of images.
         """
-        self.engine.open_file(self.number_of_images)
+        self.engine.open_file(self.number_of_pdf)
 
     def convert_and_count(self):
         """
         Convert images to PDF and update progress label.
         """
-        self.engine.convert_and_save(self.progress_label)
+        self.engine.convert_and_save(self.progress_label, self.number_of_pdf)
+
+    def merge_pdf(self):
+        """
+        Merge PDF files.
+        """
+        self.engine.merge_pdf(self.number_of_pdf)
 
     def split_and_merge_pdf(self):
         """
         Split and merge PDF files.
         """
-        self.engine.split_and_merge_pdf(start=self.engine.first_page_to_divide, stop=self.engine.last_page_to_divide)
+        self.engine.split_and_merge_pdf(start=self.engine.first_page_to_divide,
+                                        stop=self.engine.last_page_to_divide,
+                                        number_of_pdf=self.number_of_pdf)
 
-    def image_converter_widgets(self):
-        """
-        Create widgets for image conversion.
-        """
-        self.upload_label_image = NoteLabel(master=self.tab("Image converter"),
-                                            text='Download\nimages',
-                                            row=2, column=1)
-
-        self.upload_button_image = NoteButton(master=self.tab("Image converter"),
-                                              image=upload_image,
-                                              command=self.open_and_count,
-                                              row=2, column=2)
-
-        self.number_of_images = NoteLabel(master=self.tab("Image converter"),
-                                          text=f'0',
-                                          row=2, column=4)
-
-        self.transform_label_image = NoteLabel(master=self.tab("Image converter"),
-                                               text='Transform\nImage',
-                                               row=4, column=1)
-
-        self.transform_button_image = NoteButton(master=self.tab("Image converter"),
-                                                 image=transform_image,
-                                                 command=None,
-                                                 row=4, column=2)
-
-        self.image_additional_settings_button = NoteButton(master=self.tab("Image converter"),
-                                                           image=additional_settings_image_2,
-                                                           command=self.create_window_image_set,
-                                                           row=4, column=3)
-
-        self.INFO_button = NoteButton(master=self.tab("Image converter"),
-                                      text='INFO',
-                                      command=self.engine.check_parameters,
-                                      row=5, column=1)
+    def optionmenu_callback(self, choice):
+        self.engine.processing_level = choice
 
     def pdf_converter_widgets(self):
         """
         Create widgets for PDF splitting and merging.
         """
+
         self.upload_label_pdf = NoteLabel(self.tab("Pdf converter"),
                                           text='Download',
                                           row=1, column=1)
 
         self.upload_button_pdf = NoteButton(master=self.tab("Pdf converter"),
-                                            image=upload_image,
-                                            command=self.open_and_count,
+                                            image=data.upload_image,
+                                            command=self.open_and_count_pdf,
                                             row=1, column=2)
 
-        self.number_of_images = NoteLabel(self.tab("Pdf converter"),
-                                          text=f'0',
-                                          row=1, column=4)
+        self.number_of_pdf = NoteLabel(self.tab("Pdf converter"),
+                                       text=f'0',
+                                       row=1, column=4)
 
         self.convert_label_pdf = NoteLabel(self.tab("Pdf converter"),
                                            text=f'Convert\nto PDF',
                                            row=2, column=1)
 
         self.convert_button_pdf = NoteButton(master=self.tab("Pdf converter"),
-                                             image=transform_image_to_pdf,
+                                             image=data.transform_image_2,
                                              command=self.convert_and_count,
                                              row=2, column=2)
 
         self.convert_additional_settings_button_pdf = NoteButton(master=self.tab("Pdf converter"),
-                                                                 image=additional_settings_image,
+                                                                 image=data.additional_settings_image,
                                                                  command=self.create_window_image_set,
                                                                  row=2, column=3)
 
         self.progress_label = NoteLabel(self.tab("Pdf converter"),
-                                        text=f'Done 0 out of {str(len(self.engine.uploaded_files))}',
+                                        text=f'0 / {str(len(self.engine.uploaded_files))}',
                                         row=2, column=4)
 
         self.merge_label = NoteLabel(self.tab("Pdf converter"),
@@ -135,8 +109,8 @@ class SelectionOfOptions(customtkinter.CTkTabview):
                                      row=3, column=1)
 
         self.button_merge_pdf = NoteButton(master=self.tab("Pdf converter"),
-                                           image=merge_icon,
-                                           command=self.engine.merge_pdf,
+                                           image=data.merge_icon,
+                                           command=self.merge_pdf,
                                            row=3, column=2)
 
         self.split_label = NoteLabel(self.tab("Pdf converter"),
@@ -144,11 +118,47 @@ class SelectionOfOptions(customtkinter.CTkTabview):
                                      row=4, column=1)
 
         self.button_split_pdf = NoteButton(master=self.tab("Pdf converter"),
-                                           image=split_icon,
+                                           image=data.split_icon,
                                            command=self.split_and_merge_pdf,
                                            row=4, column=2)
 
         self.split_settings_button = NoteButton(master=self.tab("Pdf converter"),
-                                                image=additional_settings_image,
+                                                image=data.additional_settings_image,
                                                 command=self.create_window_split_set,
                                                 row=4, column=3)
+
+    def text_extraction_widgets(self):
+        def open_and_count_in_text_rec():
+            """
+            Open files and count the number of images.
+            """
+            self.engine.open_file(self.number_of_images_in_text_rec)
+
+        self.upload_label = NoteLabel(master=self.tab("Text recognising"),
+                                      text='Download PDF',
+                                      row=1, column=1, pady=10)
+
+        self.upload_button_image = NoteButton(master=self.tab("Text recognising"),
+                                              image=data.upload_image,
+                                              command=open_and_count_in_text_rec,
+                                              row=1, column=2)
+
+        self.number_of_images_in_text_rec = NoteLabel(master=self.tab("Text recognising"),
+                                                      text=f'0',
+                                                      row=1, column=3)
+
+        self.extract_label = NoteLabel(master=self.tab("Text recognising"),
+                                       text='Text recognising',
+                                       row=2, column=1, pady=10)
+
+        self.extract_button_image = NoteButton(master=self.tab("Text recognising"),
+                                               image=data.text_recognise_image,
+                                               command=self.engine.start_OCR,
+                                               row=2, column=2)
+
+        optionmenu_var = customtkinter.StringVar(value="Low processing")
+        optionmenu = customtkinter.CTkOptionMenu(self.tab("Text recognising"),
+                                                 values=["Low processing", "Medium processing", "Deep processing"],
+                                                 command=self.optionmenu_callback,
+                                                 variable=optionmenu_var)
+        optionmenu.grid(row=2, column=3)

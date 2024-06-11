@@ -22,72 +22,45 @@ class MyEntryField:
         self.entry_field.place(x=x, y=y)
 
 
+
 class NoteLabel:
-    def __init__(self, master, text, row, column):
+    def __init__(self, master, text, row, column,
+                 width: int = 90,
+                 height: int = 50,
+                 padx: int = 5,
+                 pady: int = 5):
 
         self.label = customtkinter.CTkLabel(
             master,
             text=text,
-            width = 70,
-            height = 30,
+            width=width,
+            height=height,
         )
-        self.label.grid(row=row, column=column, padx=5, pady=5)
+        self.label.grid(row=row, column=column, padx=padx, pady=pady)
     def update_text(self, new_text):
         self.label.configure(text=new_text)
 
 
+
 class NoteButton:
-    def __init__(self, master, command, row, column, text: str= '', image = None):
+    def __init__(self, master, command, row, column,
+                 text: str='',
+                 image=None,
+                 width: int = 90,
+                 height: int = 50,
+                 padx: int = 5,
+                 pady: int = 5):
+
         self.button = customtkinter.CTkButton(
             master,
             text=text,
             image=image,
             command=command,
-            width=70,
-            height=30,
+            width=width,
+            height=height,
         )
-        self.button.grid(row=row, column=column, padx=5, pady=5)
+        self.button.grid(row=row, column=column, padx=padx, pady=pady)
 
-
-
-class MyLabel:
-    def __init__(self, root, text, height, width, row, column, padx, pady):
-
-        self.label = customtkinter.CTkLabel(
-            root, text=text, height=height, width=width, fg_color='white',
-            text_color='black', corner_radius=20
-        )
-        self.label.grid(row=row, column=column, padx=padx, pady=pady)
-
-    def update_text(self, new_text):
-        self.label.configure(text=new_text)
-
-
-class MyCheckBox:
-    def __init__(self, root, row, column, padx, pady, variable):
-        self.checkbox = customtkinter.CTkCheckBox(root, command=None, text='', variable=variable,
-                                                  onvalue=1, offvalue=0)
-        self.checkbox.grid(row=row, column=column, padx=padx, pady=pady)
-
-    def get(self) -> Union[int, None]:
-        try:
-            return self.checkbox.get()
-        except ValueError:
-            return None
-
-
-class MyProgressBar:
-    def __init__(self, root, x, y):
-        self.progressbar = customtkinter.CTkProgressBar(
-            root, orientation="horizontal", width=80, height=20, border_width=3, corner_radius=1,
-            border_color='black', fg_color='black', progress_color='green', mode="determinate")
-        self.progressbar.place(x=x, y=y)
-
-    def set_value(self, val):
-        self.progressbar.set(val)
-
-    def upd(self):
-        self.progressbar.update()
 
 
 class FloatSpinbox(customtkinter.CTkFrame):
